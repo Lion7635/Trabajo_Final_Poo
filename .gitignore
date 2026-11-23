@@ -1,0 +1,5 @@
+# Archivos que genera NetBeans al compilar (no se suben)
+build/
+dist/
+nbproject/private/
+*.class
