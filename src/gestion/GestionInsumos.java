@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.Insumo;
+import clases.inventario.Insumo;
 import utilitario.Validador;
 
 /**

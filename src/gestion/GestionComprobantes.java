@@ -1,9 +1,9 @@
 package gestion;
 
-import clases.Boleta;
-import clases.Comprobante;
-import clases.Factura;
-import clases.Pedido;
+import clases.comprobantes.Boleta;
+import clases.comprobantes.Comprobante;
+import clases.comprobantes.Factura;
+import clases.pedidos.Pedido;
 import java.time.LocalDate;
 
 /**

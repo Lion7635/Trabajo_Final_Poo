@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.Empleado;
+import clases.empleados.Empleado;
 
 /**
  * Punto central de datos del sistema: guarda una sola instancia de cada gestor

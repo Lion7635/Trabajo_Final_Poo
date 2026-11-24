@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.Cliente;
+import clases.clientes.Cliente;
 import utilitario.Validador;
 
 /**

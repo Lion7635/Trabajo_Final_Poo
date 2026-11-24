@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.Tela;
+import clases.inventario.Tela;
 import utilitario.Validador;
 
 /**

@@ -1,10 +1,10 @@
 package gui;
 
-import clases.DetallePrenda;
-import clases.HistorialEstado;
-import clases.ItemPedido;
-import clases.ModeloPrenda;
-import clases.Pedido;
+import clases.pedidos.DetallePrenda;
+import clases.pedidos.HistorialEstado;
+import clases.pedidos.ItemPedido;
+import clases.pedidos.Pedido;
+import clases.prendas.ModeloPrenda;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;

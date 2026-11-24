@@ -1,8 +1,8 @@
 package gestion;
 
-import clases.Casaca;
-import clases.Jean;
-import clases.ModeloPrenda;
+import clases.prendas.Casaca;
+import clases.prendas.Jean;
+import clases.prendas.ModeloPrenda;
 import utilitario.Validador;
 
 /**

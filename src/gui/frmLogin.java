@@ -1,6 +1,6 @@
 package gui;
 
-import clases.Empleado;
+import clases.empleados.Empleado;
 import gestion.SistemaTextil;
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.ServicioAcabado;
+import clases.catalogo.ServicioAcabado;
 import utilitario.Validador;
 
 /**

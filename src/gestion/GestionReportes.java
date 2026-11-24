@@ -1,13 +1,13 @@
 package gestion;
 
-import clases.DetallePrenda;
-import clases.Empleado;
-import clases.EjecutivoVentas;
-import clases.ItemPedido;
-import clases.JefeProduccion;
-import clases.MateriaPrima;
-import clases.ModeloPrenda;
-import clases.Pedido;
+import clases.empleados.EjecutivoVentas;
+import clases.empleados.Empleado;
+import clases.empleados.JefeProduccion;
+import clases.inventario.MateriaPrima;
+import clases.pedidos.DetallePrenda;
+import clases.pedidos.ItemPedido;
+import clases.pedidos.Pedido;
+import clases.prendas.ModeloPrenda;
 import java.time.LocalDate;
 
 /**

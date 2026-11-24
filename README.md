@@ -17,15 +17,35 @@ Java 21 + Swing, proyecto **NetBeans (Ant)**. Los datos viven en **arreglos de o
 
 Al iniciar se cargan datos de ejemplo (`gestion/DatosIniciales.java`): 5 empleados, 10 telas, 7 insumos, 6 modelos (1 descontinuado), 4 servicios, 2 paquetes, 5 clientes y 9 pedidos en distintas etapas (entregados, en producción, cancelado), para que el tablero y los reportes tengan información.
 
-## Estructura (mismo esquema que el Lab de la Semana 13)
+## Estructura de paquetes
 
-| Paquete | Contenido |
-|---|---|
-| `clases` | Modelo: entidades, jerarquías, interfaces |
-| `gestion` | Clases `Gestion*` con los arreglos de objetos, validaciones, flujo de pedidos y reportes |
-| `gui` | Ventanas `frm*` (JFrame). Todas heredan de `FormularioBase` |
-| `utilitario` | `Validador` (validaciones y formatos) y `EscritorioPersonalizado` (fondo) |
-| `imagenes` | Íconos de botones y menús |
+Cada paquete agrupa una "familia" de clases. Así se ve en NetBeans:
+
+```
+src
+├── clases                  → MODELO (las entidades del sistema)
+│   ├── interfaces          Autenticable, Inventariable, Calculable
+│   ├── personas            Persona (padre común de empleados y clientes)
+│   ├── empleados           Empleado → Administrador, EjecutivoVentas, JefeProduccion
+│   ├── clientes            Cliente → ClienteMinorista, ClienteMayorista, ClienteInstitucional
+│   ├── prendas             ModeloPrenda → Polo, Jean, Casaca  +  InsumoRequerido
+│   ├── inventario          MateriaPrima → Tela, Insumo
+│   ├── catalogo            ServicioAcabado, Paquete
+│   ├── pedidos             Pedido, HistorialEstado, ItemPedido → DetallePrenda, DetalleServicio, DetallePaquete
+│   └── comprobantes        Comprobante → Boleta, Factura
+├── gestion                 → LÓGICA: clases Gestion* con los arreglos de objetos, validaciones y reportes
+│                             (+ SistemaTextil, que comparte los datos, y DatosIniciales)
+├── gui                     → VENTANAS: FormularioBase (padre de todas), frmLogin, frmPrincipal
+│   ├── mantenimiento       Administrador: empleados, modelos, telas, insumos, servicios, paquetes
+│   ├── ventas              Ejecutivo: clientes, nuevo pedido, adelantos/despacho/cobro
+│   ├── produccion          Jefe de Producción: corte, avance y control de calidad
+│   └── consultas           Tablero, stock de telas, reportes
+├── utilitario              Validador, EscritorioPersonalizado
+└── imagenes                Íconos
+```
+
+Regla para ubicarse: **`clases` dice QUÉ es cada cosa, `gestion` qué se HACE con ellas y `gui` cómo se MUESTRA.**
+Los subpaquetes de `gui` siguen los menús del programa.
 
 ## Dónde se aplica cada concepto de POO
 

@@ -1,6 +1,6 @@
 package gestion;
 
-import clases.Empleado;
+import clases.empleados.Empleado;
 import utilitario.Validador;
 
 /**

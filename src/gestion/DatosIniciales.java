@@ -1,20 +1,19 @@
 package gestion;
 
-import clases.Administrador;
-import clases.Casaca;
-import clases.ClienteInstitucional;
-import clases.ClienteMayorista;
-import clases.ClienteMinorista;
-import clases.EjecutivoVentas;
-import clases.Insumo;
-import clases.Jean;
-import clases.JefeProduccion;
-import clases.ModeloPrenda;
-import clases.Paquete;
-import clases.Pedido;
-import clases.Polo;
-import clases.ServicioAcabado;
-import clases.Tela;
+import clases.catalogo.Paquete;
+import clases.catalogo.ServicioAcabado;
+import clases.clientes.ClienteInstitucional;
+import clases.clientes.ClienteMayorista;
+import clases.clientes.ClienteMinorista;
+import clases.empleados.Administrador;
+import clases.empleados.EjecutivoVentas;
+import clases.empleados.JefeProduccion;
+import clases.inventario.Insumo;
+import clases.inventario.Tela;
+import clases.pedidos.Pedido;
+import clases.prendas.Casaca;
+import clases.prendas.Jean;
+import clases.prendas.Polo;
 import java.time.LocalDate;
 
 /**

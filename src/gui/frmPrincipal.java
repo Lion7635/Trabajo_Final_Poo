@@ -1,9 +1,22 @@
 package gui;
 
-import clases.Empleado;
-import clases.EjecutivoVentas;
-import clases.JefeProduccion;
+import clases.empleados.EjecutivoVentas;
+import clases.empleados.Empleado;
+import clases.empleados.JefeProduccion;
 import gestion.SistemaTextil;
+import gui.consultas.frmReportes;
+import gui.consultas.frmStockTelas;
+import gui.consultas.frmTablero;
+import gui.mantenimiento.frmEmpleados;
+import gui.mantenimiento.frmInsumos;
+import gui.mantenimiento.frmModelos;
+import gui.mantenimiento.frmPaquetes;
+import gui.mantenimiento.frmServicios;
+import gui.mantenimiento.frmTelas;
+import gui.produccion.frmProduccion;
+import gui.ventas.frmClientes;
+import gui.ventas.frmGestionPedidos;
+import gui.ventas.frmNuevoPedido;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;

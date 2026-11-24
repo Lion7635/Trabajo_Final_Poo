@@ -1,8 +1,8 @@
 package gestion;
 
-import clases.ModeloPrenda;
-import clases.Paquete;
-import clases.ServicioAcabado;
+import clases.catalogo.Paquete;
+import clases.catalogo.ServicioAcabado;
+import clases.prendas.ModeloPrenda;
 import utilitario.Validador;
 
 /**
