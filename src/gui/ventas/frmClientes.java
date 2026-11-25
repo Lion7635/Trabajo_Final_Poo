@@ -6,185 +6,650 @@ import clases.clientes.ClienteMayorista;
 import clases.clientes.ClienteMinorista;
 import gestion.GestionClientes;
 import gestion.SistemaTextil;
-import gui.FormularioBase;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
  * RF03 - Mantenimiento de clientes (Ejecutivo de Ventas).
+ * Formulario creado con el GUI Builder de NetBeans (pestaña Design).
  */
-public class frmClientes extends FormularioBase {
+public class frmClientes extends javax.swing.JFrame {
 
-    private GestionClientes gestion = SistemaTextil.getGestionClientes();
+    private GestionClientes gestionClientes;
     private DefaultTableModel modelo;
-    private JTable tabla;
 
-    private JTextField txtDocumento = new JTextField(12);
-    private JTextField txtNombres = new JTextField(28);
-    private JTextField txtTelefono = new JTextField(10);
-    private JTextField txtCorreo = new JTextField(24);
-    private JTextField txtDireccion = new JTextField(28);
-    private JComboBox<String> cboTipo = new JComboBox<>(new String[]{"Minorista", "Mayorista", "Institucional"});
-    private JLabel lblBeneficio = new JLabel();
-
+    /**
+     * Creates new form frmClientes
+     */
     public frmClientes() {
-        super("Gestión de Clientes", 980, 620);
-        JPanel form = panelFormulario(
-                new String[]{"Documento (DNI o RUC):", "Nombres o razón social:", "Teléfono:", "Correo:", "Dirección:", "Tipo de cliente:", "Beneficio:"},
-                new JComponent[]{txtDocumento, txtNombres, txtTelefono, txtCorreo, txtDireccion, cboTipo, lblBeneficio});
-
-        JButton btnBuscar = boton("Buscar", "consultar.png");
-        JButton btnRegistrar = boton("Registrar", "vcsnormal.png");
-        JButton btnActualizar = boton("Actualizar", "update_rotation.png");
-        JButton btnEliminar = boton("Eliminar", "delete_remove.png");
-        JButton btnLimpiar = boton("Limpiar", "archivo.png");
-        JPanel botones = new JPanel(new FlowLayout());
-        botones.add(btnBuscar);
-        botones.add(btnRegistrar);
-        botones.add(btnActualizar);
-        botones.add(btnEliminar);
-        botones.add(btnLimpiar);
-
-        JPanel arriba = new JPanel(new BorderLayout());
-        arriba.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8));
-        arriba.add(form, BorderLayout.CENTER);
-        arriba.add(botones, BorderLayout.SOUTH);
-
-        modelo = crearModelo(new String[]{"Documento", "Nombre / Razón social", "Tipo", "Teléfono", "Correo", "Dirección", "Beneficio"});
-        tabla = crearTabla(modelo);
-
-        JPanel norte = new JPanel(new BorderLayout());
-        norte.add(titulo("Clientes"), BorderLayout.NORTH);
-        norte.add(arriba, BorderLayout.CENTER);
-        add(norte, BorderLayout.NORTH);
-        add(new JScrollPane(tabla), BorderLayout.CENTER);
-
-        btnBuscar.addActionListener(e -> buscar());
-        btnRegistrar.addActionListener(e -> registrar());
-        btnActualizar.addActionListener(e -> actualizar());
-        btnEliminar.addActionListener(e -> eliminar());
-        btnLimpiar.addActionListener(e -> limpiar());
-        cboTipo.addActionListener(e -> lblBeneficio.setText(leerFormulario().getBeneficio()));
-        tabla.getSelectionModel().addListSelectionListener(e -> navegar());
-        lblBeneficio.setText(leerFormulario().getBeneficio());
-        listar();
+        initComponents();
+        gestionClientes = SistemaTextil.getGestionClientes();
+        getContentPane().setBackground(new java.awt.Color(236, 242, 249));
+        configurarTabla();
+        mostrarClientes(gestionClientes.buscar(""));
+        estadoInicial();
+        setLocationRelativeTo(null);
     }
 
-    @Override
-    protected void refrescar() {
-        listar();
+    // Modelo de la tabla (igual que en el Lab 13): columnas y celdas no editables
+    private void configurarTabla() {
+        modelo = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
+        };
+        modelo.addColumn("Documento");
+        modelo.addColumn("Nombre o razón social");
+        modelo.addColumn("Tipo");
+        modelo.addColumn("Teléfono");
+        modelo.addColumn("Correo");
+        modelo.addColumn("Dirección");
+        modelo.addColumn("Beneficio");
+        tblClientes.setModel(modelo);
+        tblClientes.setRowHeight(24);
+        tblClientes.getTableHeader().setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 13));
+        tblClientes.getColumnModel().getColumn(1).setPreferredWidth(240);
+        tblClientes.getColumnModel().getColumn(4).setPreferredWidth(200);
+        tblClientes.getColumnModel().getColumn(5).setPreferredWidth(220);
     }
 
-    void listar() {
+    // Llena la tabla con un arreglo de clientes
+    private void mostrarClientes(Cliente[] lista) {
         modelo.setRowCount(0);
-        for (int i = 0; i < gestion.getTotalClientes(); i++) {
-            Cliente c = gestion.getClientes()[i];
+        for (int i = 0; i < lista.length; i++) {
+            Cliente c = lista[i];
             modelo.addRow(new Object[]{c.getDocumento(), c.getNombreCompleto(), c.getTipo(), c.getTelefono(),
                 c.getCorreo(), c.getDireccion(), c.getBeneficio()});
         }
     }
 
-    void limpiar() {
+    private void buscar() {
+        mostrarClientes(gestionClientes.buscar(txtBuscar.getText(), (String) cboFiltroTipo.getSelectedItem()));
+    }
+
+    private void habilitarCampos(boolean estado) {
+        txtDocumento.setEnabled(estado);
+        txtNombres.setEnabled(estado);
+        txtTelefono.setEnabled(estado);
+        txtDireccion.setEnabled(estado);
+        txtCorreo.setEnabled(estado);
+        cboTipo.setEnabled(estado);
+    }
+
+    private void limpiarCampos() {
         txtDocumento.setText("");
         txtNombres.setText("");
         txtTelefono.setText("");
-        txtCorreo.setText("");
         txtDireccion.setText("");
+        txtCorreo.setText("");
         cboTipo.setSelectedIndex(0);
-        txtDocumento.setEditable(true);
-        tabla.clearSelection();
-        txtDocumento.requestFocus();
     }
 
-    // Según el tipo se crea un objeto de la subclase correspondiente
+    // Estado de los botones al abrir la ventana o al cancelar
+    private void estadoInicial() {
+        limpiarCampos();
+        habilitarCampos(false);
+        btnNuevo.setEnabled(true);
+        btnGrabar.setEnabled(false);
+        btnModificar.setEnabled(false);
+        btnEliminar.setEnabled(false);
+        btnCancelar.setEnabled(false);
+        tblClientes.clearSelection();
+    }
+
+    // Polimorfismo: según el tipo elegido se crea un objeto de la subclase correspondiente
     private Cliente leerFormulario() {
-        String doc = txtDocumento.getText().trim();
-        String nom = txtNombres.getText().trim();
-        String tel = txtTelefono.getText().trim();
-        String cor = txtCorreo.getText().trim();
-        String dir = txtDireccion.getText().trim();
+        String documento = txtDocumento.getText().trim();
+        String nombres = txtNombres.getText().trim();
+        String telefono = txtTelefono.getText().trim();
+        String correo = txtCorreo.getText().trim();
+        String direccion = txtDireccion.getText().trim();
         switch (cboTipo.getSelectedIndex()) {
             case 1:
-                return new ClienteMayorista(doc, nom, tel, cor, dir);
+                return new ClienteMayorista(documento, nombres, telefono, correo, direccion);
             case 2:
-                return new ClienteInstitucional(doc, nom, tel, cor, dir);
+                return new ClienteInstitucional(documento, nombres, telefono, correo, direccion);
             default:
-                return new ClienteMinorista(doc, nom, tel, cor, dir);
+                return new ClienteMinorista(documento, nombres, telefono, correo, direccion);
         }
     }
 
-    private void mostrar(Cliente c) {
+    private void mostrarCliente(Cliente c) {
         txtDocumento.setText(c.getDocumento());
         txtNombres.setText(c.getNombres());
         txtTelefono.setText(c.getTelefono());
-        txtCorreo.setText(c.getCorreo());
         txtDireccion.setText(c.getDireccion());
+        txtCorreo.setText(c.getCorreo());
         cboTipo.setSelectedItem(c.getTipo());
-        txtDocumento.setEditable(false);
     }
 
-    void buscar() {
-        Cliente c = gestion.buscarPorDocumento(txtDocumento.getText().trim());
-        if (c == null) {
-            error("No se encontró un cliente con ese documento.");
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        lblTitulo = new javax.swing.JLabel();
+        lblSubtitulo = new javax.swing.JLabel();
+        pnlDatos = new javax.swing.JPanel();
+        lblDocumento = new javax.swing.JLabel();
+        txtDocumento = new javax.swing.JTextField();
+        lblNombres = new javax.swing.JLabel();
+        txtNombres = new javax.swing.JTextField();
+        lblTelefono = new javax.swing.JLabel();
+        txtTelefono = new javax.swing.JTextField();
+        lblDireccion = new javax.swing.JLabel();
+        txtDireccion = new javax.swing.JTextField();
+        lblTipo = new javax.swing.JLabel();
+        cboTipo = new javax.swing.JComboBox<>();
+        lblBeneficio = new javax.swing.JLabel();
+        lblBeneficioValor = new javax.swing.JLabel();
+        lblCorreo = new javax.swing.JLabel();
+        txtCorreo = new javax.swing.JTextField();
+        pnlAcciones = new javax.swing.JPanel();
+        btnNuevo = new javax.swing.JButton();
+        btnGrabar = new javax.swing.JButton();
+        btnModificar = new javax.swing.JButton();
+        btnEliminar = new javax.swing.JButton();
+        btnCancelar = new javax.swing.JButton();
+        btnSalir = new javax.swing.JButton();
+        pnlBusqueda = new javax.swing.JPanel();
+        lblBuscar = new javax.swing.JLabel();
+        txtBuscar = new javax.swing.JTextField();
+        lblFiltroTipo = new javax.swing.JLabel();
+        cboFiltroTipo = new javax.swing.JComboBox<>();
+        btnBuscar = new javax.swing.JButton();
+        btnMostrarTodo = new javax.swing.JButton();
+        btnOrdenar = new javax.swing.JButton();
+        scrClientes = new javax.swing.JScrollPane();
+        tblClientes = new javax.swing.JTable();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(".: Gestión de Clientes :.");
+
+        lblTitulo.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
+        lblTitulo.setForeground(new java.awt.Color(30, 58, 95));
+        lblTitulo.setText("Mantenimiento de Clientes");
+
+        lblSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblSubtitulo.setForeground(new java.awt.Color(100, 112, 128));
+        lblSubtitulo.setText("Registre, actualice y consulte la cartera de clientes. Haga clic en una fila para editarla.");
+
+        lblDocumento.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblDocumento.setText("Documento (DNI o RUC):");
+
+        txtDocumento.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+
+        lblNombres.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblNombres.setText("Nombres o razón social:");
+
+        txtNombres.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+
+        lblTelefono.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblTelefono.setText("Teléfono:");
+
+        txtTelefono.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+
+        lblDireccion.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblDireccion.setText("Dirección:");
+
+        txtDireccion.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+
+        lblTipo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblTipo.setText("Tipo de cliente:");
+
+        cboTipo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        cboTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Minorista", "Mayorista", "Institucional" }));
+        cboTipo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboTipoActionPerformed(evt);
+            }
+        });
+
+        lblBeneficio.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblBeneficio.setText("Beneficio:");
+
+        lblBeneficioValor.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        lblBeneficioValor.setForeground(new java.awt.Color(21, 128, 61));
+        lblBeneficioValor.setText("Sin descuento");
+
+        lblCorreo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblCorreo.setText("Correo:");
+
+        txtCorreo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+
+        pnlDatos.setBackground(new java.awt.Color(236, 242, 249));
+        pnlDatos.setBorder(javax.swing.BorderFactory.createTitledBorder("Datos del cliente"));
+        javax.swing.GroupLayout pnlDatosLayout = new javax.swing.GroupLayout(pnlDatos);
+        pnlDatos.setLayout(pnlDatosLayout);
+        pnlDatosLayout.setHorizontalGroup(
+            pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDatosLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblDocumento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNombres, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtDocumento, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNombres, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                    .addComponent(txtTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDireccion, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE))
+                .addGap(35, 35, 35)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblBeneficio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblBeneficioValor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCorreo, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE))
+                .addGap(15, 15, 15))
+        );
+        pnlDatosLayout.setVerticalGroup(
+            pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDatosLayout.createSequentialGroup()
+                .addGap(8, 8, 8)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblDocumento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDocumento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblNombres, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNombres, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblBeneficio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblBeneficioValor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 10, Short.MAX_VALUE))
+        );
+
+        btnNuevo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnNuevo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        btnNuevo.setText("Nuevo");
+        btnNuevo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNuevoActionPerformed(evt);
+            }
+        });
+
+        btnGrabar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnGrabar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/vcsnormal.png"))); // NOI18N
+        btnGrabar.setText("Grabar");
+        btnGrabar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGrabarActionPerformed(evt);
+            }
+        });
+
+        btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/edit.png"))); // NOI18N
+        btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
+
+        btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/delete_remove.png"))); // NOI18N
+        btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
+
+        btnCancelar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/update_rotation.png"))); // NOI18N
+        btnCancelar.setText("Cancelar");
+        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarActionPerformed(evt);
+            }
+        });
+
+        btnSalir.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cerrar.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirActionPerformed(evt);
+            }
+        });
+
+        pnlAcciones.setBackground(new java.awt.Color(236, 242, 249));
+        pnlAcciones.setBorder(javax.swing.BorderFactory.createTitledBorder("Acciones"));
+        javax.swing.GroupLayout pnlAccionesLayout = new javax.swing.GroupLayout(pnlAcciones);
+        pnlAcciones.setLayout(pnlAccionesLayout);
+        pnlAccionesLayout.setHorizontalGroup(
+            pnlAccionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAccionesLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(btnNuevo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnGrabar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 20, Short.MAX_VALUE)
+                .addComponent(btnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
+        );
+        pnlAccionesLayout.setVerticalGroup(
+            pnlAccionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAccionesLayout.createSequentialGroup()
+                .addGap(4, 4, 4)
+                .addGroup(pnlAccionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnNuevo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnGrabar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8))
+        );
+
+        lblBuscar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblBuscar.setText("Nombre o documento:");
+
+        txtBuscar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtBuscarKeyReleased(evt);
+            }
+        });
+
+        lblFiltroTipo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblFiltroTipo.setText("Tipo:");
+
+        cboFiltroTipo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        cboFiltroTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Todos", "Minorista", "Mayorista", "Institucional" }));
+        cboFiltroTipo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboFiltroTipoActionPerformed(evt);
+            }
+        });
+
+        btnBuscar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/search.png"))); // NOI18N
+        btnBuscar.setText("Buscar");
+        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarActionPerformed(evt);
+            }
+        });
+
+        btnMostrarTodo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnMostrarTodo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/consultar.png"))); // NOI18N
+        btnMostrarTodo.setText("Mostrar todo");
+        btnMostrarTodo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMostrarTodoActionPerformed(evt);
+            }
+        });
+
+        btnOrdenar.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnOrdenar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/book.png"))); // NOI18N
+        btnOrdenar.setText("Ordenar A-Z");
+        btnOrdenar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOrdenarActionPerformed(evt);
+            }
+        });
+
+        pnlBusqueda.setBackground(new java.awt.Color(236, 242, 249));
+        pnlBusqueda.setBorder(javax.swing.BorderFactory.createTitledBorder("Búsqueda"));
+        javax.swing.GroupLayout pnlBusquedaLayout = new javax.swing.GroupLayout(pnlBusqueda);
+        pnlBusqueda.setLayout(pnlBusquedaLayout);
+        pnlBusquedaLayout.setHorizontalGroup(
+            pnlBusquedaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlBusquedaLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(lblBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(lblFiltroTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(cboFiltroTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnMostrarTodo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnOrdenar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 12, Short.MAX_VALUE))
+        );
+        pnlBusquedaLayout.setVerticalGroup(
+            pnlBusquedaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlBusquedaLayout.createSequentialGroup()
+                .addGap(4, 4, 4)
+                .addGroup(pnlBusquedaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblFiltroTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboFiltroTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnMostrarTodo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnOrdenar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8))
+        );
+
+        tblClientes.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        tblClientes.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblClientes.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblClientesMouseClicked(evt);
+            }
+        });
+
+        scrClientes.setViewportView(tblClientes);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSubtitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlDatos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlAcciones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlBusqueda, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scrClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 1000, Short.MAX_VALUE))
+                .addGap(16, 16, 16))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(lblTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addComponent(lblSubtitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(pnlDatos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(pnlAcciones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(pnlBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(scrClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                .addGap(14, 14, 14))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void cboTipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTipoActionPerformed
+        // Muestra el beneficio del tipo elegido (cada subclase lo define)
+        lblBeneficioValor.setText(leerFormulario().getBeneficio());
+    }//GEN-LAST:event_cboTipoActionPerformed
+
+    private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
+        limpiarCampos();
+        habilitarCampos(true);
+        txtDocumento.setEditable(true);
+        btnNuevo.setEnabled(false);
+        btnGrabar.setEnabled(true);
+        btnModificar.setEnabled(false);
+        btnEliminar.setEnabled(false);
+        btnCancelar.setEnabled(true);
+        txtDocumento.requestFocus();
+    }//GEN-LAST:event_btnNuevoActionPerformed
+
+    private void btnGrabarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGrabarActionPerformed
+        String resultado = gestionClientes.registrar(leerFormulario());
+        if (resultado == null) {
+            JOptionPane.showMessageDialog(this, "Cliente registrado con éxito");
+            buscar();
+            estadoInicial();
         } else {
-            mostrar(c);
+            JOptionPane.showMessageDialog(this, resultado, "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
+    }//GEN-LAST:event_btnGrabarActionPerformed
 
-    void registrar() {
-        String r = gestion.registrar(leerFormulario());
-        if (r == null) {
-            listar();
-            limpiar();
-            mensaje("Cliente registrado con éxito.");
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        String resultado = gestionClientes.actualizar(leerFormulario(), SistemaTextil.getGestionPedidos());
+        if (resultado == null) {
+            JOptionPane.showMessageDialog(this, "Cliente actualizado con éxito");
+            buscar();
+            estadoInicial();
         } else {
-            error(r);
+            JOptionPane.showMessageDialog(this, resultado, "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
+    }//GEN-LAST:event_btnModificarActionPerformed
 
-    void actualizar() {
-        String r = gestion.actualizar(leerFormulario(), SistemaTextil.getGestionPedidos());
-        if (r == null) {
-            listar();
-            mensaje("Cliente actualizado con éxito.");
-        } else {
-            error(r);
-        }
-    }
-
-    void eliminar() {
-        String doc = txtDocumento.getText().trim();
-        if (!confirmar("¿Eliminar al cliente " + doc + "?")) {
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        String documento = txtDocumento.getText().trim();
+        int respuesta = JOptionPane.showConfirmDialog(this, "¿Eliminar al cliente " + documento + "?",
+                "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (respuesta != JOptionPane.YES_OPTION) {
             return;
         }
-        String r = gestion.eliminar(doc, SistemaTextil.getGestionPedidos());
-        if (r == null) {
-            listar();
-            limpiar();
-            mensaje("Cliente eliminado.");
+        String resultado = gestionClientes.eliminar(documento, SistemaTextil.getGestionPedidos());
+        if (resultado == null) {
+            JOptionPane.showMessageDialog(this, "Cliente eliminado");
+            buscar();
+            estadoInicial();
         } else {
-            error(r);
+            JOptionPane.showMessageDialog(this, resultado, "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
+    }//GEN-LAST:event_btnEliminarActionPerformed
 
-    void navegar() {
-        int fila = tabla.getSelectedRow();
-        if (fila >= 0) {
-            Cliente c = gestion.buscarPorDocumento(modelo.getValueAt(fila, 0).toString());
-            if (c != null) {
-                mostrar(c);
-            }
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+        estadoInicial();
+    }//GEN-LAST:event_btnCancelarActionPerformed
+
+    private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
+        dispose();
+    }//GEN-LAST:event_btnSalirActionPerformed
+
+    private void txtBuscarKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarKeyReleased
+        // Busca mientras el usuario escribe
+        buscar();
+    }//GEN-LAST:event_txtBuscarKeyReleased
+
+    private void cboFiltroTipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFiltroTipoActionPerformed
+        buscar();
+    }//GEN-LAST:event_cboFiltroTipoActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        buscar();
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
+    private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
+        txtBuscar.setText("");
+        cboFiltroTipo.setSelectedIndex(0);
+        mostrarClientes(gestionClientes.buscar(""));
+    }//GEN-LAST:event_btnMostrarTodoActionPerformed
+
+    private void btnOrdenarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrdenarActionPerformed
+        // Ordenamiento burbuja por nombre (GestionClientes)
+        gestionClientes.ordenarPorNombre();
+        buscar();
+    }//GEN-LAST:event_btnOrdenarActionPerformed
+
+    private void tblClientesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblClientesMouseClicked
+        int fila = tblClientes.getSelectedRow();
+        if (fila < 0) {
+            return;
         }
-    }
+        Cliente c = gestionClientes.buscarPorDocumento(modelo.getValueAt(fila, 0).toString());
+        if (c != null) {
+            mostrarCliente(c);
+            habilitarCampos(true);
+            txtDocumento.setEditable(false);    // el documento identifica al cliente
+            btnNuevo.setEnabled(false);
+            btnGrabar.setEnabled(false);
+            btnModificar.setEnabled(true);
+            btnEliminar.setEnabled(true);
+            btnCancelar.setEnabled(true);
+        }
+    }//GEN-LAST:event_tblClientesMouseClicked
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBuscar;
+    private javax.swing.JButton btnCancelar;
+    private javax.swing.JButton btnEliminar;
+    private javax.swing.JButton btnGrabar;
+    private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnMostrarTodo;
+    private javax.swing.JButton btnNuevo;
+    private javax.swing.JButton btnOrdenar;
+    private javax.swing.JButton btnSalir;
+    private javax.swing.JComboBox<String> cboFiltroTipo;
+    private javax.swing.JComboBox<String> cboTipo;
+    private javax.swing.JLabel lblBeneficio;
+    private javax.swing.JLabel lblBeneficioValor;
+    private javax.swing.JLabel lblBuscar;
+    private javax.swing.JLabel lblCorreo;
+    private javax.swing.JLabel lblDireccion;
+    private javax.swing.JLabel lblDocumento;
+    private javax.swing.JLabel lblFiltroTipo;
+    private javax.swing.JLabel lblNombres;
+    private javax.swing.JLabel lblSubtitulo;
+    private javax.swing.JLabel lblTelefono;
+    private javax.swing.JLabel lblTipo;
+    private javax.swing.JLabel lblTitulo;
+    private javax.swing.JPanel pnlAcciones;
+    private javax.swing.JPanel pnlBusqueda;
+    private javax.swing.JPanel pnlDatos;
+    private javax.swing.JScrollPane scrClientes;
+    private javax.swing.JTable tblClientes;
+    private javax.swing.JTextField txtBuscar;
+    private javax.swing.JTextField txtCorreo;
+    private javax.swing.JTextField txtDireccion;
+    private javax.swing.JTextField txtDocumento;
+    private javax.swing.JTextField txtNombres;
+    private javax.swing.JTextField txtTelefono;
+    // End of variables declaration//GEN-END:variables
 }

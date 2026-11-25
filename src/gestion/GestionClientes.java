@@ -1,6 +1,9 @@
 package gestion;
 
 import clases.clientes.Cliente;
+import clases.clientes.ClienteInstitucional;
+import clases.clientes.ClienteMayorista;
+import clases.clientes.ClienteMinorista;
 import utilitario.Validador;
 
 /**
@@ -14,6 +17,18 @@ public class GestionClientes {
     public GestionClientes() {
         clientes = new Cliente[100];
         totalClientes = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        registrar(new ClienteMinorista("45612378", "Lucía Fernández (Bodega Moda Lucía)",
+                "987654321", "lucia.moda@gmail.com", "Jr. Gamarra 650, La Victoria"));
+        registrar(new ClienteMinorista("10712345671", "Boutique Valeria E.I.R.L.",
+                "956123478", "ventas@boutiquevaleria.pe", "Av. Larco 345, Miraflores"));
+        registrar(new ClienteMayorista("20512345678", "Distribuidora Textil Andina S.A.C.",
+                "014567890", "compras@textilandina.pe", "Av. Argentina 1520, Cercado de Lima"));
+        registrar(new ClienteInstitucional("20498765432", "Colegio San Martín de Porres",
+                "012345678", "administracion@csmp.edu.pe", "Av. Brasil 2100, Pueblo Libre"));
+        registrar(new ClienteInstitucional("20601234567", "Corporación Minera del Sur S.A.",
+                "016549870", "logistica@minerasur.com.pe", "Av. Javier Prado Este 4200, Surco"));
     }
 
     public Cliente buscarPorDocumento(String documento) {
@@ -100,6 +115,52 @@ public class GestionClientes {
             }
         }
         return "No existe un cliente con el documento " + documento + ".";
+    }
+
+    // ---------- Búsqueda (sobrecarga de métodos, Semana 07) ----------
+
+    // Clientes cuyo documento o nombre contiene el texto ("" devuelve todos)
+    public Cliente[] buscar(String texto) {
+        return buscar(texto, "Todos");
+    }
+
+    // Igual que la anterior, pero además filtra por tipo de cliente
+    public Cliente[] buscar(String texto, String tipo) {
+        String t = texto.trim().toLowerCase();
+        int c = 0;
+        for (int i = 0; i < totalClientes; i++) {
+            if (coincide(clientes[i], t, tipo)) {
+                c++;
+            }
+        }
+        Cliente[] resultado = new Cliente[c];
+        int k = 0;
+        for (int i = 0; i < totalClientes; i++) {
+            if (coincide(clientes[i], t, tipo)) {
+                resultado[k] = clientes[i];
+                k++;
+            }
+        }
+        return resultado;
+    }
+
+    private boolean coincide(Cliente c, String texto, String tipo) {
+        boolean textoOk = c.getNombreCompleto().toLowerCase().contains(texto) || c.getDocumento().contains(texto);
+        boolean tipoOk = tipo.equals("Todos") || c.getTipo().equals(tipo);
+        return textoOk && tipoOk;
+    }
+
+    // ---------- Ordenamiento burbuja por nombre (Semana 08) ----------
+    public void ordenarPorNombre() {
+        for (int i = 0; i < totalClientes - 1; i++) {
+            for (int j = 0; j < totalClientes - 1 - i; j++) {
+                if (clientes[j].getNombreCompleto().compareToIgnoreCase(clientes[j + 1].getNombreCompleto()) > 0) {
+                    Cliente aux = clientes[j];
+                    clientes[j] = clientes[j + 1];
+                    clientes[j + 1] = aux;
+                }
+            }
+        }
     }
 
     public Cliente[] getClientes() { return clientes; }

@@ -13,9 +13,24 @@ public class GestionPaquetes {
     private Paquete[] paquetes;
     private int totalPaquetes;
 
-    public GestionPaquetes() {
+    public GestionPaquetes(GestionModelos gestionModelos, GestionServicios gestionServicios) {
         paquetes = new Paquete[50];
         totalPaquetes = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        // Un paquete agrupa modelos y servicios que ya existen (agregación)
+        Paquete uniforme = new Paquete("P01", "Uniforme Escolar Completo", 175.00);
+        uniforme.agregarModelo(gestionModelos.buscarPorCodigo("M02"), 2);
+        uniforme.agregarModelo(gestionModelos.buscarPorCodigo("M05"), 1);
+        uniforme.agregarServicio(gestionServicios.buscarPorCodigo("S02"));
+        registrar(uniforme);
+
+        Paquete kit = new Paquete("P02", "Kit Corporativo", 199.00);
+        kit.agregarModelo(gestionModelos.buscarPorCodigo("M01"), 2);
+        kit.agregarModelo(gestionModelos.buscarPorCodigo("M04"), 1);
+        kit.agregarServicio(gestionServicios.buscarPorCodigo("S02"));
+        kit.agregarServicio(gestionServicios.buscarPorCodigo("S03"));
+        registrar(kit);
     }
 
     public Paquete buscarPorCodigo(String codigo) {

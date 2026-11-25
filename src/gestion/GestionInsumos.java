@@ -14,6 +14,16 @@ public class GestionInsumos {
     public GestionInsumos() {
         insumos = new Insumo[100];
         totalInsumos = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        // código, nombre, unidad, stock, stock mínimo, costo unitario
+        registrar(new Insumo("I01", "Hilo poliéster 40/2", "cono", 300, 60, 6.00));
+        registrar(new Insumo("I02", "Etiqueta tejida", "unid", 3000, 500, 0.15));
+        registrar(new Insumo("I03", "Botón 4 huecos", "unid", 2000, 400, 0.10));
+        registrar(new Insumo("I04", "Cierre metálico 18 cm", "unid", 500, 120, 1.20));
+        registrar(new Insumo("I05", "Broche de presión", "unid", 900, 300, 0.25));
+        registrar(new Insumo("I06", "Remache para jean", "unid", 2200, 400, 0.12));
+        registrar(new Insumo("I07", "Bolsa de empaque", "unid", 150, 300, 0.30));
     }
 
     public Insumo buscarPorCodigo(String codigo) {

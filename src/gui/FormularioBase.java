@@ -5,25 +5,15 @@ import clases.pedidos.HistorialEstado;
 import clases.pedidos.ItemPedido;
 import clases.pedidos.Pedido;
 import clases.prendas.ModeloPrenda;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.format.DateTimeFormatter;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -32,17 +22,16 @@ import javax.swing.table.DefaultTableModel;
 import utilitario.Validador;
 
 /**
- * Clase padre de todas las ventanas del sistema (herencia en la GUI).
- * Reúne el código que se repetía en cada formulario: botones con ícono,
- * tablas, formularios etiqueta-campo y mensajes.
+ * Clase padre de las ventanas del sistema (herencia en la GUI).
+ * Cada formulario se diseña en la pestaña Design de NetBeans y hereda de esta clase
+ * los métodos que se repetían: mensajes, modelo de tabla y textos de pedidos.
+ *
+ * Jerarquía: JFrame  <-  FormularioBase  <-  frmEmpleados, frmTelas, ...
  */
 public class FormularioBase extends JFrame {
 
-    public FormularioBase(String titulo, int ancho, int alto) {
-        setTitle(titulo + " - Sistema Textil Gamarra");
-        setSize(ancho, alto);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    public FormularioBase() {
+        getContentPane().setBackground(new Color(236, 242, 249));
         // Cada vez que la ventana recibe el foco se vuelven a leer los arreglos
         addWindowListener(new WindowAdapter() {
             @Override
@@ -52,20 +41,12 @@ public class FormularioBase extends JFrame {
         });
     }
 
-    // Las ventanas hijas lo sobrescriben para recargar sus tablas
+    // Las ventanas hijas lo sobrescriben para recargar sus tablas (polimorfismo)
     protected void refrescar() {
     }
 
-    // ---------- Componentes ----------
-    protected JButton boton(String texto, String icono) {
-        JButton b = new JButton(texto);
-        if (icono != null && getClass().getResource("/imagenes/" + icono) != null) {
-            b.setIcon(new ImageIcon(getClass().getResource("/imagenes/" + icono)));
-        }
-        return b;
-    }
-
-    // Modelo de tabla de solo lectura (igual al DefaultTableModel del lab)
+    // ---------- Tablas ----------
+    // Modelo de tabla de solo lectura (igual al DefaultTableModel del Lab 13)
     protected DefaultTableModel crearModelo(String[] columnas) {
         DefaultTableModel modelo = new DefaultTableModel() {
             @Override
@@ -79,43 +60,13 @@ public class FormularioBase extends JFrame {
         return modelo;
     }
 
-    protected JTable crearTabla(DefaultTableModel modelo) {
-        JTable tabla = new JTable(modelo);
+    // Le asigna el modelo a una JTable creada en la pestaña Design
+    protected void configurarTabla(JTable tabla, DefaultTableModel modelo) {
+        tabla.setModel(modelo);
         tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabla.setRowHeight(22);
         tabla.getTableHeader().setReorderingAllowed(false);
-        return tabla;
-    }
-
-    // Arma un formulario de dos columnas: etiqueta | campo
-    protected JPanel panelFormulario(String[] etiquetas, JComponent[] campos) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(4, 6, 4, 6);
-        c.anchor = GridBagConstraints.WEST;
-        for (int i = 0; i < etiquetas.length; i++) {
-            c.gridx = 0;
-            c.gridy = i;
-            c.weightx = 0;
-            c.fill = GridBagConstraints.NONE;
-            panel.add(new JLabel(etiquetas[i]), c);
-            c.gridx = 1;
-            c.weightx = 1;
-            c.fill = GridBagConstraints.HORIZONTAL;
-            panel.add(campos[i], c);
-        }
-        return panel;
-    }
-
-    protected JPanel titulo(String texto) {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(new Color(30, 58, 95));
-        JLabel l = new JLabel(texto);
-        l.setForeground(Color.WHITE);
-        l.setFont(new Font("SansSerif", Font.BOLD, 17));
-        l.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-        p.add(l, BorderLayout.CENTER);
-        return p;
+        tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
     }
 
     // ---------- Mensajes ----------

@@ -14,6 +14,19 @@ public class GestionTelas {
     public GestionTelas() {
         telas = new Tela[100];
         totalTelas = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        // código, tipo, color, metros en stock, stock mínimo, costo por metro
+        registrar(new Tela("T01", "Jersey Algodón Pima", "Negro", 1400, 250, 14.50));
+        registrar(new Tela("T02", "Jersey Algodón Pima", "Blanco", 1200, 250, 14.50));
+        registrar(new Tela("T03", "Jersey Algodón Pima", "Azul marino", 300, 150, 14.50));
+        registrar(new Tela("T04", "Piqué Algodón", "Blanco", 900, 200, 12.00));
+        registrar(new Tela("T05", "Piqué Algodón", "Azul marino", 1000, 200, 12.00));
+        registrar(new Tela("T06", "Denim 12 oz", "Azul índigo", 1100, 250, 18.00));
+        registrar(new Tela("T07", "Denim 12 oz", "Negro", 300, 200, 18.00));
+        registrar(new Tela("T08", "Drill Poliéster", "Negro", 800, 150, 11.00));
+        registrar(new Tela("T09", "Drill Poliéster", "Azul marino", 400, 150, 11.00));
+        registrar(new Tela("T10", "Polar", "Azul marino", 250, 120, 15.00));
     }
 
     public Tela buscarPorCodigo(String codigo) {

@@ -14,6 +14,13 @@ public class GestionServicios {
     public GestionServicios() {
         servicios = new ServicioAcabado[50];
         totalServicios = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        // código, nombre, precio por prenda, costo por prenda, ¿es acabado?, ¿lleva logo?
+        registrar(new ServicioAcabado("S01", "Estampado serigrafía 1 color", 3.50, 1.40, true, false));
+        registrar(new ServicioAcabado("S02", "Bordado de logo", 6.00, 2.50, true, true));
+        registrar(new ServicioAcabado("S03", "Empaque personalizado", 1.20, 0.50, false, false));
+        registrar(new ServicioAcabado("S04", "Estampado de logo full color", 5.00, 2.00, true, true));
     }
 
     public ServicioAcabado buscarPorCodigo(String codigo) {

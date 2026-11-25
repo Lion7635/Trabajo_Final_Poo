@@ -17,154 +17,417 @@ import gui.produccion.frmProduccion;
 import gui.ventas.frmClientes;
 import gui.ventas.frmGestionPedidos;
 import gui.ventas.frmNuevoPedido;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import utilitario.EscritorioPersonalizado;
 
 /**
- * Ventana principal. RF09: cada usuario solo ve los menús de su rol.
- * El permiso se pregunta al objeto Empleado (método polimórfico tienePermiso).
+ * Ventana principal. RF09: cada usuario solo ve las opciones de su rol.
+ * El permiso se le pregunta al objeto Empleado (método polimórfico tienePermiso).
  */
-public class frmPrincipal extends JFrame {
+public class frmPrincipal extends javax.swing.JFrame {
 
+    private EscritorioPersonalizado escritorio;
     private Empleado usuario;
 
+    /**
+     * Creates new form frmPrincipal
+     */
     public frmPrincipal(Empleado usuario) {
+        initComponents();
         this.usuario = usuario;
-        setTitle("Sistema Textil Gamarra - " + usuario.getNombreCompleto() + " (" + usuario.getRol() + ")");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 700);
-        setLocationRelativeTo(null);
-        setExtendedState(MAXIMIZED_BOTH);
-
-        EscritorioPersonalizado escritorio = new EscritorioPersonalizado("Confecciones Gamarra",
-                "Bienvenido(a), " + usuario.getNombres() + " · " + usuario.getRol());
-        setLayout(new BorderLayout());
-        add(escritorio, BorderLayout.CENTER);
-
-        JLabel barraEstado = new JLabel("  Usuario: " + usuario.getUsuario() + "   |   Rol: " + usuario.getRol()
-                + "   |   Use el menú superior para acceder a sus opciones");
-        barraEstado.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        barraEstado.setOpaque(true);
-        barraEstado.setBackground(new Color(225, 232, 240));
-        add(barraEstado, BorderLayout.SOUTH);
-
-        crearMenu();
+        escritorio = new EscritorioPersonalizado("Usuario: " + usuario.getNombreCompleto()
+                + "     |     Rol: " + usuario.getRol() + "     |     Use el menú superior para acceder a sus opciones");
+        this.setContentPane(escritorio);
+        setTitle(".: Sistema Textil Gamarra - " + usuario.getNombreCompleto() + " (" + usuario.getRol() + ") :.");
+        cargarPermisos();
     }
 
-    private void crearMenu() {
-        JMenuBar barra = new JMenuBar();
+    // Muestra u oculta cada opción según el rol (polimorfismo)
+    private void cargarPermisos() {
+        mnitmEmpleados.setVisible(usuario.tienePermiso(Empleado.MOD_EMPLEADOS));
+        mnitmModelos.setVisible(usuario.tienePermiso(Empleado.MOD_MODELOS));
+        mnitmTelas.setVisible(usuario.tienePermiso(Empleado.MOD_MATERIA_PRIMA));
+        mnitmInsumos.setVisible(usuario.tienePermiso(Empleado.MOD_MATERIA_PRIMA));
+        mnitmServicios.setVisible(usuario.tienePermiso(Empleado.MOD_MATERIA_PRIMA));
+        mnitmPaquetes.setVisible(usuario.tienePermiso(Empleado.MOD_MATERIA_PRIMA));
+        mnitmClientes.setVisible(usuario.tienePermiso(Empleado.MOD_CLIENTES));
+        mnitmNuevoPedido.setVisible(usuario.tienePermiso(Empleado.MOD_PEDIDOS));
+        mnitmGestionPedidos.setVisible(usuario.tienePermiso(Empleado.MOD_PEDIDOS));
+        mnitmProduccion.setVisible(usuario.tienePermiso(Empleado.MOD_PRODUCCION));
+        mnitmTablero.setVisible(usuario.tienePermiso(Empleado.MOD_TABLERO));
+        mnitmStockTelas.setVisible(usuario.tienePermiso(Empleado.MOD_STOCK));
+        mnitmReportes.setVisible(usuario.tienePermiso(Empleado.MOD_REPORTES));
 
-        // Sesión (todos)
-        JMenu mnSesion = new JMenu("Sesión");
-        mnSesion.setIcon(icono("archivo.png"));
-        JMenuItem itmCerrarSesion = new JMenuItem("Cerrar sesión");
-        JMenuItem itmSalir = new JMenuItem("Salir", icono("cerrar.png"));
-        itmCerrarSesion.addActionListener(e -> cerrarSesion());
-        itmSalir.addActionListener(e -> System.exit(0));
-        mnSesion.add(itmCerrarSesion);
-        mnSesion.add(itmSalir);
-        barra.add(mnSesion);
-
-        // Mantenimiento (Administrador)
-        JMenu mnMantenimiento = new JMenu("Mantenimiento");
-        mnMantenimiento.setIcon(icono("mantenimiento.png"));
-        agregar(mnMantenimiento, "Empleados", Empleado.MOD_EMPLEADOS);
-        agregar(mnMantenimiento, "Modelos de prendas", Empleado.MOD_MODELOS);
-        agregar(mnMantenimiento, "Telas", Empleado.MOD_MATERIA_PRIMA);
-        agregar(mnMantenimiento, "Insumos y avíos", Empleado.MOD_MATERIA_PRIMA);
-        agregar(mnMantenimiento, "Servicios de acabado", Empleado.MOD_MATERIA_PRIMA);
-        agregar(mnMantenimiento, "Paquetes promocionales", Empleado.MOD_MATERIA_PRIMA);
-        agregarSiTieneOpciones(barra, mnMantenimiento);
-
-        // Ventas (Ejecutivo de Ventas)
-        JMenu mnVentas = new JMenu("Ventas");
-        mnVentas.setIcon(icono("book.png"));
-        agregar(mnVentas, "Clientes", Empleado.MOD_CLIENTES);
-        agregar(mnVentas, "Nuevo pedido", Empleado.MOD_PEDIDOS);
-        agregar(mnVentas, "Pedidos: adelantos, despacho y cobro", Empleado.MOD_PEDIDOS);
-        agregarSiTieneOpciones(barra, mnVentas);
-
-        // Producción (Jefe de Producción)
-        JMenu mnProduccion = new JMenu("Producción");
-        mnProduccion.setIcon(icono("edit.png"));
-        agregar(mnProduccion, "Avance de producción y calidad", Empleado.MOD_PRODUCCION);
-        agregarSiTieneOpciones(barra, mnProduccion);
-
-        // Consultas (todos los roles)
-        JMenu mnConsultas = new JMenu("Consultas");
-        mnConsultas.setIcon(icono("consultar.png"));
-        agregar(mnConsultas, "Tablero de pedidos", Empleado.MOD_TABLERO);
-        agregar(mnConsultas, "Stock de telas", Empleado.MOD_STOCK);
-        agregarSiTieneOpciones(barra, mnConsultas);
-
-        // Reportes (Administrador)
-        JMenu mnReportes = new JMenu("Reportes");
-        mnReportes.setIcon(icono("reporte.png"));
-        agregar(mnReportes, "Reportes gerenciales", Empleado.MOD_REPORTES);
-        agregarSiTieneOpciones(barra, mnReportes);
-
-        setJMenuBar(barra);
+        // Un menú solo se muestra si tiene al menos una opción visible
+        mnMantenimiento.setVisible(tieneOpciones(mnMantenimiento));
+        mnVentas.setVisible(tieneOpciones(mnVentas));
+        mnProduccion.setVisible(tieneOpciones(mnProduccion));
+        mnConsultas.setVisible(tieneOpciones(mnConsultas));
+        mnReportes.setVisible(tieneOpciones(mnReportes));
     }
 
-    // Agrega la opción solo si el rol del usuario tiene permiso para ese módulo
-    private void agregar(JMenu menu, String texto, String modulo) {
-        if (usuario.tienePermiso(modulo)) {
-            JMenuItem item = new JMenuItem(texto);
-            item.addActionListener(e -> abrirVentana(texto));
-            menu.add(item);
+    private boolean tieneOpciones(JMenu menu) {
+        for (int i = 0; i < menu.getItemCount(); i++) {
+            if (menu.getItem(i).isVisible()) {
+                return true;
+            }
         }
+        return false;
     }
 
-    // Crea la ventana que corresponde a la opción elegida
-    private void abrirVentana(String opcion) {
-        JFrame ventana = null;
-        switch (opcion) {
-            case "Empleados": ventana = new frmEmpleados(); break;
-            case "Modelos de prendas": ventana = new frmModelos(); break;
-            case "Telas": ventana = new frmTelas(); break;
-            case "Insumos y avíos": ventana = new frmInsumos(); break;
-            case "Servicios de acabado": ventana = new frmServicios(); break;
-            case "Paquetes promocionales": ventana = new frmPaquetes(); break;
-            case "Clientes": ventana = new frmClientes(); break;
-            case "Nuevo pedido": ventana = new frmNuevoPedido((EjecutivoVentas) usuario); break;
-            case "Pedidos: adelantos, despacho y cobro": ventana = new frmGestionPedidos(); break;
-            case "Avance de producción y calidad": ventana = new frmProduccion((JefeProduccion) usuario); break;
-            case "Tablero de pedidos": ventana = new frmTablero(); break;
-            case "Stock de telas": ventana = new frmStockTelas(); break;
-            case "Reportes gerenciales": ventana = new frmReportes(); break;
-        }
-        if (ventana != null) {
-            ventana.setVisible(true);
-        }
-    }
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-    private void agregarSiTieneOpciones(JMenuBar barra, JMenu menu) {
-        if (menu.getItemCount() > 0) {
-            barra.add(menu);
-        }
-    }
+        menuBar = new javax.swing.JMenuBar();
+        mnSesion = new javax.swing.JMenu();
+        mnitmCerrarSesion = new javax.swing.JMenuItem();
+        mnitmSalir = new javax.swing.JMenuItem();
+        mnMantenimiento = new javax.swing.JMenu();
+        mnitmEmpleados = new javax.swing.JMenuItem();
+        mnitmModelos = new javax.swing.JMenuItem();
+        mnitmTelas = new javax.swing.JMenuItem();
+        mnitmInsumos = new javax.swing.JMenuItem();
+        mnitmServicios = new javax.swing.JMenuItem();
+        mnitmPaquetes = new javax.swing.JMenuItem();
+        mnVentas = new javax.swing.JMenu();
+        mnitmClientes = new javax.swing.JMenuItem();
+        mnitmNuevoPedido = new javax.swing.JMenuItem();
+        mnitmGestionPedidos = new javax.swing.JMenuItem();
+        mnProduccion = new javax.swing.JMenu();
+        mnitmProduccion = new javax.swing.JMenuItem();
+        mnConsultas = new javax.swing.JMenu();
+        mnitmTablero = new javax.swing.JMenuItem();
+        mnitmStockTelas = new javax.swing.JMenuItem();
+        mnReportes = new javax.swing.JMenu();
+        mnitmReportes = new javax.swing.JMenuItem();
 
-    private ImageIcon icono(String nombre) {
-        if (getClass().getResource("/imagenes/" + nombre) == null) {
-            return null;
-        }
-        return new ImageIcon(getClass().getResource("/imagenes/" + nombre));
-    }
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle(".: Sistema Textil Gamarra :.");
 
-    private void cerrarSesion() {
+        mnSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnSesion.setText("Sesión");
+
+        mnitmCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/update_rotation.png"))); // NOI18N
+        mnitmCerrarSesion.setText("Cerrar sesión");
+        mnitmCerrarSesion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmCerrarSesionActionPerformed(evt);
+            }
+        });
+        mnSesion.add(mnitmCerrarSesion);
+
+        mnitmSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cerrar.png"))); // NOI18N
+        mnitmSalir.setText("Salir");
+        mnitmSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmSalirActionPerformed(evt);
+            }
+        });
+        mnSesion.add(mnitmSalir);
+
+        menuBar.add(mnSesion);
+
+        mnMantenimiento.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mantenimiento.png"))); // NOI18N
+        mnMantenimiento.setText("Mantenimiento");
+
+        mnitmEmpleados.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmEmpleados.setText("Empleados");
+        mnitmEmpleados.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmEmpleadosActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmEmpleados);
+
+        mnitmModelos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmModelos.setText("Modelos de prendas");
+        mnitmModelos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmModelosActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmModelos);
+
+        mnitmTelas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmTelas.setText("Telas");
+        mnitmTelas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmTelasActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmTelas);
+
+        mnitmInsumos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmInsumos.setText("Insumos y avíos");
+        mnitmInsumos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmInsumosActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmInsumos);
+
+        mnitmServicios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmServicios.setText("Servicios de acabado");
+        mnitmServicios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmServiciosActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmServicios);
+
+        mnitmPaquetes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmPaquetes.setText("Paquetes promocionales");
+        mnitmPaquetes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmPaquetesActionPerformed(evt);
+            }
+        });
+        mnMantenimiento.add(mnitmPaquetes);
+
+        menuBar.add(mnMantenimiento);
+
+        mnVentas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/book.png"))); // NOI18N
+        mnVentas.setText("Ventas");
+
+        mnitmClientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/archivo.png"))); // NOI18N
+        mnitmClientes.setText("Clientes");
+        mnitmClientes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmClientesActionPerformed(evt);
+            }
+        });
+        mnVentas.add(mnitmClientes);
+
+        mnitmNuevoPedido.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/edit.png"))); // NOI18N
+        mnitmNuevoPedido.setText("Nuevo pedido");
+        mnitmNuevoPedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmNuevoPedidoActionPerformed(evt);
+            }
+        });
+        mnVentas.add(mnitmNuevoPedido);
+
+        mnitmGestionPedidos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/consultar.png"))); // NOI18N
+        mnitmGestionPedidos.setText("Adelantos, despacho y cobro");
+        mnitmGestionPedidos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmGestionPedidosActionPerformed(evt);
+            }
+        });
+        mnVentas.add(mnitmGestionPedidos);
+
+        menuBar.add(mnVentas);
+
+        mnProduccion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/edit.png"))); // NOI18N
+        mnProduccion.setText("Producción");
+
+        mnitmProduccion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/edit.png"))); // NOI18N
+        mnitmProduccion.setText("Avance de producción y calidad");
+        mnitmProduccion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmProduccionActionPerformed(evt);
+            }
+        });
+        mnProduccion.add(mnitmProduccion);
+
+        menuBar.add(mnProduccion);
+
+        mnConsultas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/consultar.png"))); // NOI18N
+        mnConsultas.setText("Consultas");
+
+        mnitmTablero.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/consultar.png"))); // NOI18N
+        mnitmTablero.setText("Tablero de pedidos");
+        mnitmTablero.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmTableroActionPerformed(evt);
+            }
+        });
+        mnConsultas.add(mnitmTablero);
+
+        mnitmStockTelas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/search.png"))); // NOI18N
+        mnitmStockTelas.setText("Stock de telas");
+        mnitmStockTelas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmStockTelasActionPerformed(evt);
+            }
+        });
+        mnConsultas.add(mnitmStockTelas);
+
+        menuBar.add(mnConsultas);
+
+        mnReportes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/reporte.png"))); // NOI18N
+        mnReportes.setText("Reportes");
+
+        mnitmReportes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/reporte.png"))); // NOI18N
+        mnitmReportes.setText("Reportes gerenciales");
+        mnitmReportes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnitmReportesActionPerformed(evt);
+            }
+        });
+        mnReportes.add(mnitmReportes);
+
+        menuBar.add(mnReportes);
+
+        setJMenuBar(menuBar);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1000, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void mnitmCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmCerrarSesionActionPerformed
         // Cierra todas las ventanas abiertas y vuelve al login
-        for (java.awt.Window w : java.awt.Window.getWindows()) {
-            w.dispose();
+        for (java.awt.Window ventana : java.awt.Window.getWindows()) {
+            ventana.dispose();
         }
         SistemaTextil.setUsuarioActual(null);
         new frmLogin().setVisible(true);
+    }//GEN-LAST:event_mnitmCerrarSesionActionPerformed
+
+    private void mnitmSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmSalirActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_mnitmSalirActionPerformed
+
+    private void mnitmEmpleadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmEmpleadosActionPerformed
+        frmEmpleados frm = new frmEmpleados();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmEmpleadosActionPerformed
+
+    private void mnitmModelosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmModelosActionPerformed
+        frmModelos frm = new frmModelos();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmModelosActionPerformed
+
+    private void mnitmTelasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmTelasActionPerformed
+        frmTelas frm = new frmTelas();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmTelasActionPerformed
+
+    private void mnitmInsumosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmInsumosActionPerformed
+        frmInsumos frm = new frmInsumos();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmInsumosActionPerformed
+
+    private void mnitmServiciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmServiciosActionPerformed
+        frmServicios frm = new frmServicios();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmServiciosActionPerformed
+
+    private void mnitmPaquetesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmPaquetesActionPerformed
+        frmPaquetes frm = new frmPaquetes();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmPaquetesActionPerformed
+
+    private void mnitmClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmClientesActionPerformed
+        frmClientes frm = new frmClientes();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmClientesActionPerformed
+
+    private void mnitmNuevoPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmNuevoPedidoActionPerformed
+        frmNuevoPedido frm = new frmNuevoPedido((EjecutivoVentas) usuario);
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmNuevoPedidoActionPerformed
+
+    private void mnitmGestionPedidosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmGestionPedidosActionPerformed
+        frmGestionPedidos frm = new frmGestionPedidos();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmGestionPedidosActionPerformed
+
+    private void mnitmProduccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmProduccionActionPerformed
+        frmProduccion frm = new frmProduccion((JefeProduccion) usuario);
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmProduccionActionPerformed
+
+    private void mnitmTableroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmTableroActionPerformed
+        frmTablero frm = new frmTablero();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmTableroActionPerformed
+
+    private void mnitmStockTelasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmStockTelasActionPerformed
+        frmStockTelas frm = new frmStockTelas();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmStockTelasActionPerformed
+
+    private void mnitmReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnitmReportesActionPerformed
+        frmReportes frm = new frmReportes();
+        frm.setLocationRelativeTo(null);
+        frm.setVisible(true);
+    }//GEN-LAST:event_mnitmReportesActionPerformed
+
+    public static void main(String args[]) {
+        /* Look and feel de Windows, igual que en los laboratorios */
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(frmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        SistemaTextil.cargarDatosIniciales();
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                frmPrincipal frame = new frmPrincipal(SistemaTextil.getGestionEmpleados().autenticar("admin", "admin123"));
+                frame.setExtendedState(MAXIMIZED_BOTH);
+                frame.setVisible(true);
+            }
+        });
     }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenu mnConsultas;
+    private javax.swing.JMenuItem mnitmCerrarSesion;
+    private javax.swing.JMenuItem mnitmClientes;
+    private javax.swing.JMenuItem mnitmEmpleados;
+    private javax.swing.JMenuItem mnitmGestionPedidos;
+    private javax.swing.JMenuItem mnitmInsumos;
+    private javax.swing.JMenuItem mnitmModelos;
+    private javax.swing.JMenuItem mnitmNuevoPedido;
+    private javax.swing.JMenuItem mnitmPaquetes;
+    private javax.swing.JMenuItem mnitmProduccion;
+    private javax.swing.JMenuItem mnitmReportes;
+    private javax.swing.JMenuItem mnitmSalir;
+    private javax.swing.JMenuItem mnitmServicios;
+    private javax.swing.JMenuItem mnitmStockTelas;
+    private javax.swing.JMenuItem mnitmTablero;
+    private javax.swing.JMenuItem mnitmTelas;
+    private javax.swing.JMenu mnMantenimiento;
+    private javax.swing.JMenu mnProduccion;
+    private javax.swing.JMenu mnReportes;
+    private javax.swing.JMenu mnSesion;
+    private javax.swing.JMenu mnVentas;
+    // End of variables declaration//GEN-END:variables
 }

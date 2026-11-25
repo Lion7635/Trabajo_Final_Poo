@@ -1,8 +1,10 @@
 package gestion;
 
+import clases.inventario.Insumo;
 import clases.prendas.Casaca;
 import clases.prendas.Jean;
 import clases.prendas.ModeloPrenda;
+import clases.prendas.Polo;
 import utilitario.Validador;
 
 /**
@@ -14,9 +16,60 @@ public class GestionModelos {
     private ModeloPrenda[] modelos;
     private int totalModelos;
 
-    public GestionModelos() {
+    public GestionModelos(GestionInsumos gestionInsumos) {
         modelos = new ModeloPrenda[100];
         totalModelos = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        // Los insumos ya están registrados en GestionInsumos: se buscan por su código
+        Insumo hilo = gestionInsumos.buscarPorCodigo("I01");
+        Insumo etiqueta = gestionInsumos.buscarPorCodigo("I02");
+        Insumo boton = gestionInsumos.buscarPorCodigo("I03");
+        Insumo cierre = gestionInsumos.buscarPorCodigo("I04");
+        Insumo broche = gestionInsumos.buscarPorCodigo("I05");
+        Insumo remache = gestionInsumos.buscarPorCodigo("I06");
+
+        // consumo de tela por talla S, M, L, XL; tiempo (min); precio; costo de costura; activo
+        Polo poloPima = new Polo("M01", "Polo Pima Clásico", "Jersey Algodón Pima",
+                new double[]{1.10, 1.20, 1.30, 1.45}, 25, 35.00, 4.50, true);
+        poloPima.agregarInsumo(hilo, 0.04);
+        poloPima.agregarInsumo(etiqueta, 1);
+        registrar(poloPima);
+
+        Polo poloPique = new Polo("M02", "Polo Piqué Cuello Camisero", "Piqué Algodón",
+                new double[]{1.20, 1.30, 1.40, 1.55}, 35, 42.00, 6.00, true);
+        poloPique.agregarInsumo(hilo, 0.05);
+        poloPique.agregarInsumo(etiqueta, 1);
+        poloPique.agregarInsumo(boton, 3);
+        registrar(poloPique);
+
+        Jean jean = new Jean("M03", "Jean Clásico 5 Bolsillos", "Denim 12 oz",
+                new double[]{1.30, 1.40, 1.50, 1.65}, 45, 89.00, 9.00, true, 6.50);
+        jean.agregarInsumo(hilo, 0.08);
+        jean.agregarInsumo(etiqueta, 1);
+        jean.agregarInsumo(boton, 1);
+        jean.agregarInsumo(remache, 6);
+        registrar(jean);
+
+        Casaca casacaDrill = new Casaca("M04", "Casaca Drill Corporativa", "Drill Poliéster",
+                new double[]{1.80, 1.95, 2.10, 2.30}, 70, 129.00, 14.00, true, 9.50, 4.00);
+        casacaDrill.agregarInsumo(hilo, 0.10);
+        casacaDrill.agregarInsumo(etiqueta, 1);
+        casacaDrill.agregarInsumo(cierre, 1);
+        casacaDrill.agregarInsumo(broche, 4);
+        registrar(casacaDrill);
+
+        Casaca casacaPolar = new Casaca("M05", "Casaca Polar Escolar", "Polar",
+                new double[]{1.60, 1.70, 1.85, 2.00}, 55, 95.00, 10.00, true, 0.00, 3.00);
+        casacaPolar.agregarInsumo(hilo, 0.08);
+        casacaPolar.agregarInsumo(etiqueta, 1);
+        casacaPolar.agregarInsumo(cierre, 1);
+        registrar(casacaPolar);
+
+        Polo poloBasico = new Polo("M06", "Polo Básico Cuello Redondo", "Jersey Algodón Pima",
+                new double[]{1.00, 1.10, 1.20, 1.30}, 20, 25.00, 3.50, false);   // Descontinuado
+        poloBasico.agregarInsumo(etiqueta, 1);
+        registrar(poloBasico);
     }
 
     public ModeloPrenda buscarPorCodigo(String codigo) {

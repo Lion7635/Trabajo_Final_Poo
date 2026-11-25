@@ -1,6 +1,9 @@
 package gestion;
 
+import clases.empleados.Administrador;
+import clases.empleados.EjecutivoVentas;
 import clases.empleados.Empleado;
+import clases.empleados.JefeProduccion;
 import utilitario.Validador;
 
 /**
@@ -16,6 +19,13 @@ public class GestionEmpleados {
     public GestionEmpleados() {
         empleados = new Empleado[50];
         totalEmpleados = 0;
+
+        // Datos iniciales: se registran al crear la gestión (igual que en los laboratorios)
+        registrar(new Administrador("41234567", "Jorge", "Quispe Ramos", "admin", "admin123"));
+        registrar(new EjecutivoVentas("45678901", "Carla", "Mendoza Ríos", "cmendoza", "ventas123"));
+        registrar(new EjecutivoVentas("46789012", "Diego", "Salas Paredes", "dsalas", "ventas123"));
+        registrar(new JefeProduccion("42345678", "Rosa", "Huamán Torres", "rhuaman", "prod123"));
+        registrar(new JefeProduccion("43456789", "Luis", "Chávez Lino", "lchavez", "prod123"));
     }
 
     public Empleado buscarPorDni(String dni) {
